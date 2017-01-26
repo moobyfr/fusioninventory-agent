@@ -297,7 +297,8 @@ sub run {
                     $self->_runTarget($target);
                 };
                 $self->{logger}->error($EVAL_ERROR) if $EVAL_ERROR;
-                $target->resetNextRunDate();
+                # Only update nextRunDate if successfull
+                $target->resetNextRunDate() unless $EVAL_ERROR;
 
                 # Leave immediately if we passed in terminate method
                 last unless $self->getTargets();
@@ -310,7 +311,8 @@ sub run {
                 # check for http interface messages, default timeout is 1 second
                 $self->{server}->handleRequests() or delay(1);
             } else {
-                delay(1);
+                # wait 60s before retrying to send inventory
+                delay(60);
             }
         }
     } else {
